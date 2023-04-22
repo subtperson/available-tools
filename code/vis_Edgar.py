@@ -7,7 +7,7 @@ import argparse
 # path = "E:\\数据集\\KITTI\\training"
 path = "C:\\Users\\lance\\Desktop\\edgar\\training"
 parse = argparse.ArgumentParser()
-parse.add_argument('--index', type=str, default='12')
+parse.add_argument('--index', type=str, default='1013')
 args = parse.parse_args()
 
 def rot_y(rotation_y):
@@ -108,6 +108,8 @@ def main(index):
 
     pc_path = os.path.join(path, "velodyne", "{:06d}.bin".format(index))
     raw_points = np.fromfile(pc_path, dtype=np.float32, count=-1, ).reshape([-1, 4])[:, :3]
+    print(raw_points[0:8])
+    print(raw_points.shape)
     pcd = o3d.open3d.geometry.PointCloud()
     pcd.points = o3d.open3d.utility.Vector3dVector(raw_points)
     # o3d.visualization.draw_geometries([pcd])
