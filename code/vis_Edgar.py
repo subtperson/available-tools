@@ -5,9 +5,9 @@ import argparse
 
 
 # path = "E:\\数据集\\KITTI\\training"
-path = "C:\\Users\\lance\\Desktop\\edgar\\training"
+path = "C:\\Users\\lance\\Desktop\\subtperson\\edgar\\training"
 parse = argparse.ArgumentParser()
-parse.add_argument('--index', type=str, default='1013')
+parse.add_argument('--index', type=str, default='1009')
 args = parse.parse_args()
 
 def rot_y(rotation_y):
@@ -73,7 +73,7 @@ def get_objects(vis, index):
             corner_3d[1, :] += obj[obj_index].location[1]
             corner_3d[2, :] += obj[obj_index].location[2]
             corner_3d = np.vstack((corner_3d, np.zeros((1, corner_3d.shape[-1]))))
-            corner_3d[-1][-1] = 1
+            # corner_3d[-1][-1] = 1
 
             inv_Tr = np.zeros_like(calib1.Tr_velo_to_cam)
             inv_Tr[0:3, 0:3] = np.transpose(calib1.Tr_velo_to_cam[0:3, 0:3])
@@ -94,6 +94,7 @@ def draw_box(vis,Y):
     line_set.lines = o3d.utility.Vector2iVector(lines_box)
     line_set.colors = o3d.utility.Vector3dVector(colors)
     line_set.points = o3d.utility.Vector3dVector(points_box)
+
 
 
     #vis.update_geometry(line_set)
