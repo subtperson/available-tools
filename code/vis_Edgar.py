@@ -5,9 +5,9 @@ import argparse
 
 
 # path = "E:\\数据集\\KITTI\\training"
-path = "C:\\Users\\lance\\Desktop\\edgar\\training"
+path = "/media/gty/14BA7CD7BA7CB6B8/lzy_2022/subt_person/ST3D/data/edgar/test_val"
 parse = argparse.ArgumentParser()
-parse.add_argument('--index', type=str, default='1013')
+parse.add_argument('--index', type=str, default='1002')
 args = parse.parse_args()
 
 def rot_y(rotation_y):
@@ -50,22 +50,25 @@ def get_calib(index):
         dict_calib[key] = np.array([float(x) for x in value.split()])
     return Calib(dict_calib)
 
-def get_objects(vis, index):
+
+
+def get_objects(vis, index, path_label, color=[0, 1, 0]):
     calib1 = get_calib(index)
-    box_path = os.path.join(path, "label", "{:06d}.txt".format(index))
+
+    box_path = os.path.join(path, path_label, "{:06d}.txt".format(index))
     with open(box_path) as f:
         lines = f.readlines()
-    lines = list(filter(lambda x: len(x) > 0 and x !='\n', lines))
+    lines = list(filter(lambda x: len(x) > 0 and x != '\n', lines))
     obj = [Object3d(x) for x in lines]
     for obj_index in range(len(obj)):
         if obj[obj_index].name == "Car" or obj[obj_index].name == "Pedestrian" or obj[obj_index].name == "Cyclist":
             R = rot_y(obj[obj_index].rotation_y)
             h, w, l = obj[obj_index].dimensions[0], obj[obj_index].dimensions[1], obj[obj_index].dimensions[2]
-            x = [l/2, l/2, -l/2, -l/2, l/2, l/2, -l/2, -l/2]
-            #y = [h / 2, h / 2, h / 2, h / 2, -h / 2, -h / 2, -h / 2, -h / 2]
+            x = [l / 2, l / 2, -l / 2, -l / 2, l / 2, l / 2, -l / 2, -l / 2]
+            # y = [h / 2, h / 2, h / 2, h / 2, -h / 2, -h / 2, -h / 2, -h / 2]
             y = [0, 0, 0, 0, -h, -h, -h, -h]
-            z = [w/2, -w/2, -w/2, w/2, w/2, -w/2, -w/2, w/2]
-            corner_3d = np.vstack([x,y,z])
+            z = [w / 2, -w / 2, -w / 2, w / 2, w / 2, -w / 2, -w / 2, w / 2]
+            corner_3d = np.vstack([x, y, z])
             print(corner_3d)
             corner_3d = np.dot(R, corner_3d)
 
@@ -73,23 +76,23 @@ def get_objects(vis, index):
             corner_3d[1, :] += obj[obj_index].location[1]
             corner_3d[2, :] += obj[obj_index].location[2]
             corner_3d = np.vstack((corner_3d, np.zeros((1, corner_3d.shape[-1]))))
-            corner_3d[-1][-1] = 1
+            # corner_3d[-1][-1] = 1
 
             inv_Tr = np.zeros_like(calib1.Tr_velo_to_cam)
             inv_Tr[0:3, 0:3] = np.transpose(calib1.Tr_velo_to_cam[0:3, 0:3])
-            inv_Tr[0:3, 3] = np.dot(-np.transpose(calib1.Tr_velo_to_cam[0:3,0:3]), calib1.Tr_velo_to_cam[0:3, 3])
+            inv_Tr[0:3, 3] = np.dot(-np.transpose(calib1.Tr_velo_to_cam[0:3, 0:3]), calib1.Tr_velo_to_cam[0:3, 3])
 
             Y = np.dot(inv_Tr, corner_3d)
 
-            draw_box(vis,Y)
+            draw_box(vis, Y, color=color)
 
-def draw_box(vis,Y):
+def draw_box(vis,Y, color=[0, 1, 0]):
     points_d3box = Y
     points_box = np.transpose(points_d3box)
     lines_box = np.array([[0, 1], [1, 2], [0, 3], [2, 3], [4, 5], [4, 7], [5, 6],
                           [6, 7], [0, 4], [1, 5], [2, 6], [3, 7], [0, 5], [1, 4]])   # , [3, 6], [2, 7]
     # print(lines_box.shape)
-    colors = np.array([[0, 1, 0] for j in range(len(lines_box))])
+    colors = np.array([color for j in range(len(lines_box))])
     line_set = o3d.geometry.LineSet()
     line_set.lines = o3d.utility.Vector2iVector(lines_box)
     line_set.colors = o3d.utility.Vector3dVector(colors)
@@ -113,6 +116,7 @@ def main(index):
     pcd = o3d.open3d.geometry.PointCloud()
     pcd.points = o3d.open3d.utility.Vector3dVector(raw_points)
     # o3d.visualization.draw_geometries([pcd])
+    pcd.paint_uniform_color([1, 1, 1])
     vis = o3d.visualization.Visualizer()
     vis.create_window(window_name="kitti")
     vis.get_render_option().point_size = 1
@@ -120,7 +124,8 @@ def main(index):
     vis.get_render_option().background_color = np.asarray([0, 0, 0])
     vis.add_geometry(pcd)
 
-    get_objects(vis,index)
+    get_objects(vis, index, "data", color=[0, 1, 0])
+    get_objects(vis, index, "label", color=[1, 0, 0])
     vis.run()
 
 
