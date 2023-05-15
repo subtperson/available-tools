@@ -13,6 +13,7 @@ def get_label(image_path, save_label_path):
     print(img.shape, img_w, img_h)
 
     r_channel = img[:, :, 0]
+    r_channel =255 - r_channel
     a, b = np.nonzero(r_channel)
 
     print(a)
@@ -28,6 +29,7 @@ def get_label(image_path, save_label_path):
 
     boxs = []
     temp = [0, 0, 0, 0, 0]
+    temp.append(xcenter)
     temp[1] = xcenter / img_w
     temp[2] = ycenter / img_h
     temp[3] = xwidth / img_w
@@ -43,9 +45,9 @@ def get_label(image_path, save_label_path):
 
 
 if __name__ == '__main__':
-    img_floder = "C:\\Users\\lance\\Desktop\\new_fire\\GT"
-    save_label_floder = "C:\\Users\\lance\\Desktop\\firetest\\l"
-    for i in range(len(os.listdir(img_floder))):
+    img_floder = "C:\\Users\\lance\\Desktop\\new_fire\\GT-459-471"
+    save_label_floder = "C:\\Users\\lance\\Desktop\\firetest\\l-459-471"
+    for i in range(459, 472):
         img_path = img_floder + "\\" + str(i).zfill(3) + ".png"
         save_label_path = save_label_floder + "\\" + str(i).zfill(3) + ".txt"
         get_label(img_path, save_label_path)

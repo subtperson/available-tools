@@ -8,7 +8,7 @@ import open3d
 size_float = 4
 list_pcd = []
 # with open('C:\\Users\\lance\\Desktop\\GoogleDrive\\codes\\demo\\data\\kitti\\kitti_000008.bin', "rb") as f:
-with open('C:\\Users\\lance\\Desktop\\edgar\\training\\velodyne\\000013.bin', "rb") as f:
+with open('C:\\Users\\lance\\Desktop\\subtperson\\edgar\\training\\velodyne\\000019.bin', "rb") as f:
     byte = f.read(size_float * 4)
     while byte:
         x, y, z, intensity = struct.unpack("ffff", byte)
