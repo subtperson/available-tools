@@ -7,7 +7,7 @@ import argparse
 # path = "E:\\数据集\\KITTI\\training"
 path = "/media/gty/14BA7CD7BA7CB6B8/lzy_2022/subt_person/ST3D/data/edgar/test_val"
 parse = argparse.ArgumentParser()
-parse.add_argument('--index', type=str, default='1123')
+parse.add_argument('--index', type=str, default='1008')
 args = parse.parse_args()
 
 def rot_y(rotation_y):
@@ -51,16 +51,22 @@ def get_calib(index):
         dict_calib[key] = np.array([float(x) for x in value.split()])
     return Calib(dict_calib)
 
-def get_objects(vis, index, path_label, color=[0, 1, 0]):
+def get_objects(vis, index, path_label, color=[0, 1, 0], stat = "tp_gt"):
     calib1 = get_calib(index)
-
+    stat_path = os.path.join(path,  "{}.txt".format(stat))
+    dict_stat = {}
+    with open(stat_path) as f:
+        lines = f.readlines()
+        dict_stat = eval(lines[0])
+        print(dict_stat[index])
     box_path = os.path.join(path, path_label, "{:06d}.txt".format(index))
     with open(box_path) as f:
         lines = f.readlines()
     lines = list(filter(lambda x: len(x) > 0 and x != '\n', lines))
     obj = [Object3d(x) for x in lines]
     for obj_index in range(len(obj)):
-        if obj[obj_index].name == "Car" or obj[obj_index].name == "Pedestrian" or obj[obj_index].name == "Cyclist":
+        # print(dict_stat[index])
+        if obj[obj_index].name == "Pedestrian" and obj_index in dict_stat[index]:
             R = rot_y(obj[obj_index].rotation_y)
             h, w, l = obj[obj_index].dimensions[0], obj[obj_index].dimensions[1], obj[obj_index].dimensions[2]
             x = [l / 2, l / 2, -l / 2, -l / 2, l / 2, l / 2, -l / 2, -l / 2]
@@ -68,7 +74,7 @@ def get_objects(vis, index, path_label, color=[0, 1, 0]):
             y = [0, 0, 0, 0, -h, -h, -h, -h]
             z = [w / 2, -w / 2, -w / 2, w / 2, w / 2, -w / 2, -w / 2, w / 2]
             corner_3d = np.vstack([x, y, z])
-            print(corner_3d)
+            # print(corner_3d)
             corner_3d = np.dot(R, corner_3d)
 
             corner_3d[0, :] += obj[obj_index].location[0]
@@ -110,8 +116,8 @@ def main(index):
 
     pc_path = os.path.join(path, "velodyne", "{:06d}.bin".format(index))
     raw_points = np.fromfile(pc_path, dtype=np.float32, count=-1, ).reshape([-1, 4])[:, :3]
-    print(raw_points[0:8])
-    print(raw_points.shape)
+    # print(raw_points[0:8])
+    # print(raw_points.shape)
 
     raw_points = raw_points[8:]
     pcd = o3d.open3d.geometry.PointCloud()
@@ -125,8 +131,11 @@ def main(index):
     vis.get_render_option().background_color = np.asarray([0, 0, 0])
     vis.add_geometry(pcd)
 
-    get_objects(vis, index, "data", color=[0, 1, 0])
-    get_objects(vis, index, "label", color=[1, 0, 0])
+    
+    get_objects(vis, index, "label", color=[1, 0, 0], stat = "tp_gt") # 红色，gt
+    get_objects(vis, index, "data", color=[1, 1, 0], stat = "tp_pre") # 黄色，正确检测
+    get_objects(vis, index, "label", color=[0, 1, 0], stat = "fn") # 绿色，漏检
+    get_objects(vis, index, "data", color=[0, 0, 1], stat = "fp") # 蓝色，误检
 
     vis.run()
 
