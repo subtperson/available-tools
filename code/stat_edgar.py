@@ -7,7 +7,7 @@ import numpy as np
 
 path = 'C:\\Users\\lance\\Desktop\\subtperson\\edgar\\training\\label'
 label_list = os.listdir(path)
-label_list = label_list[700:999]
+label_list = label_list[700:999] # 只统计验证集
 
 print(label_list)
 

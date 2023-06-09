@@ -8,7 +8,7 @@ import open3d
 size_float = 4
 list_pcd = []
 # with open('C:\\Users\\lance\\Desktop\\GoogleDrive\\codes\\demo\\data\\kitti\\kitti_000008.bin', "rb") as f:
-with open('C:\\Users\\lance\\Desktop\\subtperson\\edgar\\training\\velodyne\\000019.bin', "rb") as f:
+with open('C:\\Users\\lance\\Desktop\\subtperson\\edgar\\training\\velodyne\\001003.bin', "rb") as f:
     byte = f.read(size_float * 4)
     while byte:
         x, y, z, intensity = struct.unpack("ffff", byte)
@@ -17,11 +17,17 @@ with open('C:\\Users\\lance\\Desktop\\subtperson\\edgar\\training\\velodyne\\000
 np_pcd = np.asarray(list_pcd)
 print(np_pcd.shape)
 np_pcd = np_pcd[4:]  # Edgar数据集的一些场景，前几个点数据不对，删去，要不影响可视化
+
+np_pcd[:, 2] = 0   #
+
+
 pcd = open3d.geometry.PointCloud()
 pcd.points = open3d.utility.Vector3dVector(np_pcd)
 
 # 点云颜色
 pcd.paint_uniform_color([1,1,1])
+
+
 
 
 # 旋转
@@ -38,8 +44,8 @@ vis = open3d.visualization.Visualizer()
 vis.create_window()	#创建窗口
 # vis.register_animation_callback(rotate_view)
 render_option: open3d.visualization.RenderOption = vis.get_render_option()	#设置点云渲染参数
-render_option.background_color = np.array([0, 0, 0])	#设置背景色（这里为黑色）
-render_option.point_size = 3.0	#设置渲染点的大小
+render_option.background_color = np.array([0,0,0])	#设置背景色（这里为黑色）
+render_option.point_size = 2	#设置渲染点的大小
 vis.add_geometry(pcd)	#添加点云
 vis.run()
 
