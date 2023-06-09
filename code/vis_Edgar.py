@@ -5,9 +5,9 @@ import argparse
 
 
 # path = "E:\\数据集\\KITTI\\training"
-path = "/media/gty/14BA7CD7BA7CB6B8/lzy_2022/subt_person/ST3D/data/edgar/test_val"
+path = "/media/gty/14BA7CD7BA7CB6B8/lzy_2022/subt_person/ST3D/data/edgar/training"
 parse = argparse.ArgumentParser()
-parse.add_argument('--index', type=str, default='1123')
+parse.add_argument('--index', type=str, default='1015')
 args = parse.parse_args()
 
 def rot_y(rotation_y):
@@ -60,7 +60,7 @@ def get_objects(vis, index, path_label, color=[0, 1, 0]):
     lines = list(filter(lambda x: len(x) > 0 and x != '\n', lines))
     obj = [Object3d(x) for x in lines]
     for obj_index in range(len(obj)):
-        if obj[obj_index].name == "Car" or obj[obj_index].name == "Pedestrian" or obj[obj_index].name == "Cyclist":
+        if obj[obj_index].name == "Pedestrian":
             R = rot_y(obj[obj_index].rotation_y)
             h, w, l = obj[obj_index].dimensions[0], obj[obj_index].dimensions[1], obj[obj_index].dimensions[2]
             x = [l / 2, l / 2, -l / 2, -l / 2, l / 2, l / 2, -l / 2, -l / 2]
@@ -125,8 +125,8 @@ def main(index):
     vis.get_render_option().background_color = np.asarray([0, 0, 0])
     vis.add_geometry(pcd)
 
-    get_objects(vis, index, "data", color=[0, 1, 0])
-    get_objects(vis, index, "label", color=[1, 0, 0])
+    get_objects(vis, index, "final", color=[0, 1, 0])
+    get_objects(vis, index, "label_2", color=[1, 0, 0])
 
     vis.run()
 
