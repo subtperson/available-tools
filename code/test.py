@@ -1,32 +1,83 @@
+# coding=utf-8
+# 将KITTI的bin格式点云转换为pcd格式，并可视化
 
-# import sympy
-from sympy import *
-
-# Use sympy.eigenvals() method
-matD = Matrix([[2, 0, 0],
-              [0, 1, 0],
-              [0, 0, -2]])
-matUplusL = Matrix([[0, 1, -1],
-                   [-1, 0, -1],
-                   [-1, -1, 0]])
-
-mat = matD.inv() * matUplusL
-print(mat)
-d = mat.eigenvals()
-print(d)
-a = 2.1784/2 + (1/4) * (1/(1+0.125**3) + 1/(1+0.375**3) + 1/(1+0.625**3) + 1/(1+0.875**3) + 1/(1+1.125**3) + 1/(1+1.375**3) + 1/(1+1.625**3) + 1/(1+1.875**3))
-print(a)
+import numpy as np
+import struct
+import open3d
+import torch
+import argparse
 
 
-A = Matrix([[3,2],
-            [1,2]])
-print(A.eigenvals())
+def parse_config():
+    parser = argparse.ArgumentParser(description='arg parser')
+    parser.add_argument('--index', type=str, default='000017', help='index of the data')
+    parser.add_argument('--dir', type=str, default='traino1s2', help='specify the config for training/testing/temp')
+    args = parser.parse_args()
+    return args
+args = parse_config()
+data = torch.load('/media/lzy/14BA7CD7BA7CB6B8/lzy_2022/subt_person/ST3D/temp/'+ args.dir +'/'+ args.index +'.pth')
+print(data['points'].shape)
+
+np_pcd = data['points']
+
+# np_pcd = np.load('/media/lzy/14BA7CD7BA7CB6B8/lzy_2022/DataSets/jrdb2kitti/training/velodyne/000005.npy')
+# np_pcd = np_pcd[:, :3]
 
 
-ans = 16/(16+0.5**2) + 16/(16+1.5**2) + 16/(16+2.5**2) + 16/(16+3.5**2)
-print(ans/2 + 3.13118/2)
 
-mat = Matrix([[0, 0, 2],
-              [0, 2, 0],
-              [3, 0, 0]])
-print(mat.transpose().inv())
+# print(np_pcd.shape)
+np_pcd = np_pcd[4:]  # Edgar数据集的一些场景，前几个点数据不对，删去，要不影响可视化
+print(np_pcd[0:30,3])
+
+# np_pcd[:, 2] = 0   
+# limit z axis < 1 and > -1
+# np_pcd = np_pcd[np_pcd[:, 2] > -2]
+# np_pcd = np_pcd[np_pcd[:, 2] < 0.8]
+
+
+
+pcd = open3d.geometry.PointCloud()
+
+
+# in np_pcd, the first three columns are x,y,z, the last column is color of the point
+pcd.points = open3d.utility.Vector3dVector(np_pcd[:, 0:3])
+# color from 1 channel to 3 channels
+color = np_pcd[:, 3:4]
+# copy color and set it all 0
+zero = np.zeros_like(color)
+
+color = np.concatenate((color, zero, zero), axis=1)
+
+pcd.colors = open3d.utility.Vector3dVector(color)
+# pcd.colors = open3d.utility.Vector3dVector()
+
+# 点云颜色
+# pcd.paint_uniform_color([1,1,1])
+
+
+
+
+# 旋转
+def rotate_view(vis):
+    ctr = vis.get_view_control()
+    ctr.rotate(10.0, 0.0)
+    return False
+
+# 方法1
+# open3d.visualization.draw_geometries_with_animation_callback([pcd], rotate_view)
+
+# 方法2
+vis = open3d.visualization.Visualizer()
+vis.create_window()	#创建窗口
+# vis.register_animation_callback(rotate_view)
+render_option: open3d.visualization.RenderOption = vis.get_render_option()	#设置点云渲染参数
+render_option.background_color = np.array([1,1,1])	#设置背景色（这里为黑色）
+render_option.point_size = 1	#设置渲染点的大小
+vis.add_geometry(pcd)	#添加点云
+# 坐标系
+vis.add_geometry(open3d.geometry.TriangleMesh.create_coordinate_frame(size=1.0, origin=[0, 0, 0]))
+
+vis.run()
+
+# 保存pcd
+# open3d.io.write_point_cloud('1644609772_916356000.pcd', pcd, write_ascii=False, compressed=False, print_progress=False)

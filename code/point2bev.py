@@ -3,6 +3,7 @@
 # 2023.6.7 lzy
 import os
 
+import numpy
 import numpy as np
 from PIL import Image
 import struct
@@ -76,10 +77,15 @@ def p2bev(p_path, bev_path):
 
 if __name__ == '__main__':
 
-    p_path = 'C:\\Users\\lance\\Desktop\\subtperson\\edgar\\training\\velodyne'
-    bev_path = 'C:\\Users\\lance\\Desktop\\subtperson\\edgar\\training\\bev'
-    pclist = os.listdir(p_path)
+    p_path = '/media/gty/14BA7CD7BA7CB6B8/lzy_2022/subt_person/ST3D/data/kitti/training/velodyne'
+    bev_path = '/media/gty/14BA7CD7BA7CB6B8/lzy_2022/subt_person/ST3D/data/kitti/training/bev'
+    #bev folder is exist?
+    if not os.path.exists(bev_path):
+        os.makedirs(bev_path)
+    split_path = '/media/gty/14BA7CD7BA7CB6B8/lzy_2022/subt_person/ST3D/data/kitti/ImageSets/trainval.txt'
+    pclist = numpy.loadtxt(split_path, dtype=str).tolist()
     print(len(pclist))
+    print(pclist)
     for pcname in pclist:
-        print(pcname)
-        p2bev(os.path.join(p_path, pcname), os.path.join(bev_path, str.replace(pcname, '.bin', '.png')))
+        print(pcname+'.bin')
+        p2bev(os.path.join(p_path, pcname+'.bin'), os.path.join(bev_path, pcname+'.png'))

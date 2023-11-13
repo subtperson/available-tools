@@ -5,9 +5,9 @@ import argparse
 
 
 # path = "E:\\数据集\\KITTI\\training"
-path = "/media/lzy/14BA7CD7BA7CB6B8/lzy_2022/subt_person/ST3D/data/kitti/training"
+path = "/media/lzy/14BA7CD7BA7CB6B8/lzy_2022/subt_person/ST3D/data/jrdbk/training"
 parse = argparse.ArgumentParser()
-parse.add_argument('--index', type=str, default='000011')
+parse.add_argument('--index', type=str, default='006088')
 args = parse.parse_args()
 
 def rot_y(rotation_y):
@@ -68,7 +68,7 @@ def get_objects(vis, index, path_label, color=[0, 1, 0]):
             y = [0, 0, 0, 0, -h, -h, -h, -h]
             z = [w / 2, -w / 2, -w / 2, w / 2, w / 2, -w / 2, -w / 2, w / 2]
             corner_3d = np.vstack([x, y, z])
-            print(corner_3d)
+            # print(corner_3d)
             corner_3d = np.dot(R, corner_3d)
 
             corner_3d[0, :] += obj[obj_index].location[0]
@@ -108,9 +108,9 @@ def draw_box(vis,Y, color=[0, 1, 0]):
 
 def main(index):
 
-    pc_path = os.path.join(path, "velodyne", "{:06d}.bin".format(index))
-    raw_points = np.fromfile(pc_path, dtype=np.float32, count=-1, ).reshape([-1, 4])[:, :3]
-    print(raw_points[0:8])
+    pc_path = os.path.join(path, "velodyne", "{:06d}.npy".format(index))
+    raw_points = np.load(pc_path)[:,:3]
+    # print(raw_points[0:8])
     print(raw_points.shape)
 
     raw_points = raw_points[8:]

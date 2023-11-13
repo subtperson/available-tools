@@ -5,9 +5,9 @@ import argparse
 
 
 # path = "E:\\数据集\\KITTI\\training"
-path = "/media/gty/14BA7CD7BA7CB6B8/lzy_2022/subt_person/ST3D/data/edgar/test_val"
+path = "/media/lzy/14BA7CD7BA7CB6B8/lzy_2022/subt_person/ST3D/data/edgar/training/"
 parse = argparse.ArgumentParser()
-parse.add_argument('--index', type=str, default='1008')
+parse.add_argument('--index', type=str, default='0005')
 args = parse.parse_args()
 
 def rot_y(rotation_y):
@@ -132,10 +132,10 @@ def main(index):
     vis.add_geometry(pcd)
 
     
-    get_objects(vis, index, "label", color=[1, 0, 0], stat = "tp_gt") # 红色，gt
-    get_objects(vis, index, "data", color=[1, 1, 0], stat = "tp_pre") # 黄色，正确检测
-    get_objects(vis, index, "label", color=[0, 1, 0], stat = "fn") # 绿色，漏检
-    get_objects(vis, index, "data", color=[0, 0, 1], stat = "fp") # 蓝色，误检
+    # get_objects(vis, index, "label", color=[1, 0, 0], stat = "tp_gt") # 红色，gt
+    # get_objects(vis, index, "data", color=[1, 1, 0], stat = "tp_pre") # 黄色，正确检测
+    # get_objects(vis, index, "label", color=[0, 1, 0], stat = "fn") # 绿色，漏检
+    # get_objects(vis, index, "data", color=[0, 0, 1], stat = "fp") # 蓝色，误检
 
     vis.run()
 
